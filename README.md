@@ -19,7 +19,7 @@
 
 ## 安装
 
-到 [Releases](https://github.com/AaronShawn/wxgy-checkin-android/releases/latest) 下载 `wxgy-checkin-android-v1.0.0.apk`，允许「安装未知来源应用」后安装。
+到 [Releases](https://github.com/AaronShawn/wxgy-checkin-android/releases/latest) 下载 `wxgy-checkin-android-v1.0.1.apk`，允许「安装未知来源应用」后安装。
 
 - 支持 Android 7.0（API 24）及以上，arm64 与 armeabi-v7a 通吃
 - 首次打开授予相机权限；不打字、不上传相册，只用相机
@@ -50,7 +50,7 @@
 
 ## 技术说明
 
-- **登录**：CAS OAuth2。学校登录页把密码倒序后做 RSA（PKCS#1 v1.5）再提交，本应用用 `javax.crypto` 复刻同一过程；拿到 `ST-` ticket 后换 `accessToken`。
+- **登录**：CAS OAuth2。学校登录页把密码倒序后做裸 RSA（**没有 PKCS#1 填充**，输出小写 hex），本应用用 `java.math.BigInteger` 复刻同一过程，并有单元测试与学校 JS 库逐字节比对；拿到 `ST-` ticket 后换 `accessToken`。
 - **签名**：`appId=wxgycq` + `timestamp` + `nonce` 排序拼接 `&`，接原始 JSON body 与密钥做 SHA-256，放进 `sign` 头。
 - **提交**：`POST /app-api/attendance/check/studentChecKlnSecret`，照片是 JPEG data URL，并在第 30 个字符处插入标记 `KwLiSlaC`；返回 `requestId` 后每 2 秒轮询核验结果。
 - **登录态**：token 失效时用本地保存的账密自动重登一次，失败才回登录页。

@@ -13,16 +13,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
-import java.math.BigInteger
 import java.net.URL
 import java.net.URLEncoder
-import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-import java.security.spec.RSAPublicKeySpec
 import java.util.concurrent.TimeUnit
-import javax.crypto.Cipher
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -210,14 +206,8 @@ object Api {
 
     // ------------------------------------------------------------ 登录
 
-    private fun rsaEncrypt(modulusHex: String, exponentHex: String, password: String): String {
-        val spec = RSAPublicKeySpec(BigInteger(modulusHex, 16), BigInteger(exponentHex, 16))
-        val key = KeyFactory.getInstance("RSA").generatePublic(spec)
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        // 学校前端会把密码倒序后再做 RSA，服务端按同样规则还原
-        return Base64.encodeToString(cipher.doFinal(password.reversed().toByteArray(Charsets.UTF_8)), Base64.NO_WRAP)
-    }
+    private fun rsaEncrypt(modulusHex: String, exponentHex: String, password: String): String =
+        CasCrypto.rsaEncrypt(modulusHex, exponentHex, password)
 
     /** 完整 CAS 登录，成功后返回 accessToken */
     suspend fun casLogin(username: String, password: String): String = withContext(Dispatchers.IO) {
